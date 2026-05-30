@@ -7,6 +7,7 @@ passed to them by the orchestrator.
 from __future__ import annotations
 
 import json
+import re
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -101,7 +102,9 @@ class Policy:
             return self._d["waiting_periods"]["initial_waiting_period_days"]
         diag = diagnosis.lower()
         for condition, days in self._d["waiting_periods"]["specific_conditions"].items():
-            if condition.replace("_", " ") in diag:
+            cond = condition.replace("_", " ")
+            # Word-boundary match prevents "hernia" from matching "herniation"
+            if re.search(r"\b" + re.escape(cond) + r"\b", diag):
                 return int(days)
         return self._d["waiting_periods"]["initial_waiting_period_days"]
 
@@ -115,7 +118,14 @@ class Policy:
         if not diagnosis:
             return False
         diag = diagnosis.lower()
-        return any(excl.lower() in diag for excl in self._d["exclusions"]["conditions"])
+        for excl in self._d["exclusions"]["conditions"]:
+            excl_lower = excl.lower()
+            if excl_lower in diag:                                      # full-phrase match
+                return True
+            words = [w for w in excl_lower.split() if len(w) > 4]
+            if any(w in diag for w in words):                          # keyword match
+                return True
+        return False
 
     # -- required documents -----------------------------------------------
 
