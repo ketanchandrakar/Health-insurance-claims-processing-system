@@ -16,5 +16,5 @@ def verify_documents(
     policy: Policy,
     unreadable_ids: list[str],
 ) -> DocCheckResult:
-    # stub — real implementation in Commit 7
+    # yet to implement
     return DocCheckResult(passed=True)

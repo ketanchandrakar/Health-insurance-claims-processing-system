@@ -25,7 +25,7 @@ def adjudicate(
     claim: ClaimRequest,
     policy: Policy,
 ) -> AdjudicationResult:
-    # stub — guards implemented in Commit 5, financial calc in Commit 6
+    #yet to implement
     return AdjudicationResult(
         decision=DecisionStatus.APPROVED,
         approved_amount=claim.claimed_amount,

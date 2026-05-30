@@ -22,7 +22,7 @@ def extract(doc: DocumentInput, fixture: dict | None = None) -> ExtractedDoc:
     if fixture is not None:
         return ExtractedDoc.model_validate(fixture)
 
-    # stub — real Gemini call implemented in Commit 8
+    # yet to implement
     return ExtractedDoc(
         file_id=doc.file_id,
         doc_type=doc.actual_type or DocumentType.UNKNOWN,

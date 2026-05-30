@@ -12,7 +12,7 @@ Decision precedence (highest priority wins):
   5. fraud.escalate_to_review   -> override to MANUAL_REVIEW
   6. degraded=True              -> recommend_manual_review=True, lower confidence
 
-Full confidence model added in Commit 11; this commit uses a basic version.
+Full confidence model yet to be added 
 """
 from app.models import (
     AdjudicationResult,

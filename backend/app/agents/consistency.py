@@ -10,5 +10,5 @@ from app.models import ConsistencyResult, ExtractedDoc
 
 
 def check_consistency(docs: list[ExtractedDoc]) -> ConsistencyResult:
-    # stub — real implementation in Commit 9
+    #yet to implement
     return ConsistencyResult(consistent=True)

@@ -11,5 +11,5 @@ from app.policy import Policy
 
 
 def detect_fraud(claim: ClaimRequest, policy: Policy) -> FraudResult:
-    # stub — real implementation in Commit 10
+    #yet to implement
     return FraudResult()
