@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Env / secrets
+.env
+.env.*
+
+# Node / React
+node_modules/
+frontend/dist/
+frontend/build/
+
+# Eval output
+eval/reports/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+CLAUDE.md
+DECISIONS.md
+backend/app/agents/*
