@@ -134,47 +134,53 @@ def evaluate(
     except Exception as exc:
         degraded = True
         collector.degraded("extractor", f"Extraction error: {exc}", duration_ms=_ms(t0))
+        # Consistency and adjudicator need extracted docs to do useful work.
+        # Skip them so their OK status doesn't inflate confidence.
+        for comp in ("consistency", "adjudicator"):
+            collector.record(comp, TraceStatus.SKIPPED, "Skipped — extraction failed")
 
     # ------------------------------------------------------------------
-    # 4. Cross-document consistency — Gate 2
+    # 4. Cross-document consistency — Gate 2 (skipped if extraction failed)
     # ------------------------------------------------------------------
-    t0 = time.monotonic()
-    try:
-        consistency = check_consistency(extracted)
-        s = TraceStatus.OK if consistency.consistent else TraceStatus.FAILED
-        collector.record(
-            "consistency", s,
-            "Consistency check passed" if consistency.consistent else f"Inconsistency: {consistency.message}",
-            consistency.model_dump(), _ms(t0),
-        )
-    except Exception as exc:
-        degraded = True
-        collector.degraded("consistency", f"Consistency error: {exc}", duration_ms=_ms(t0))
+    if extracted:
+        t0 = time.monotonic()
+        try:
+            consistency = check_consistency(extracted)
+            s = TraceStatus.OK if consistency.consistent else TraceStatus.FAILED
+            collector.record(
+                "consistency", s,
+                "Consistency check passed" if consistency.consistent else f"Inconsistency: {consistency.message}",
+                consistency.model_dump(), _ms(t0),
+            )
+        except Exception as exc:
+            degraded = True
+            collector.degraded("consistency", f"Consistency error: {exc}", duration_ms=_ms(t0))
 
-    if not consistency.consistent:
-        for comp in ("adjudicator", "fraud"):
-            collector.record(comp, TraceStatus.SKIPPED, "Skipped — consistency gate failed")
-        return synthesize(validation, doc_check, consistency, adjudication, fraud,
-                          degraded, collector.events)
+        if not consistency.consistent:
+            for comp in ("adjudicator", "fraud"):
+                collector.record(comp, TraceStatus.SKIPPED, "Skipped — consistency gate failed")
+            return synthesize(validation, doc_check, consistency, adjudication, fraud,
+                              degraded, collector.events)
 
     # ------------------------------------------------------------------
-    # 5. Adjudication
+    # 5. Adjudication (skipped if extraction failed)
     # ------------------------------------------------------------------
-    t0 = time.monotonic()
-    try:
-        adjudication = adjudicate(extracted, claim, policy)
-        collector.record(
-            "adjudicator", TraceStatus.OK,
-            f"Adjudication: {adjudication.decision.value}, approved ₹{adjudication.approved_amount}",
-            adjudication.model_dump(), _ms(t0),
-        )
-    except Exception as exc:
-        degraded = True
-        adjudication = AdjudicationResult(
-            decision=DecisionStatus.MANUAL_REVIEW,
-            notes=f"Adjudicator error: {exc}",
-        )
-        collector.degraded("adjudicator", f"Adjudicator error: {exc}", duration_ms=_ms(t0))
+    if extracted:
+        t0 = time.monotonic()
+        try:
+            adjudication = adjudicate(extracted, claim, policy)
+            collector.record(
+                "adjudicator", TraceStatus.OK,
+                f"Adjudication: {adjudication.decision.value}, approved ₹{adjudication.approved_amount}",
+                adjudication.model_dump(), _ms(t0),
+            )
+        except Exception as exc:
+            degraded = True
+            adjudication = AdjudicationResult(
+                decision=DecisionStatus.MANUAL_REVIEW,
+                notes=f"Adjudicator error: {exc}",
+            )
+            collector.degraded("adjudicator", f"Adjudicator error: {exc}", duration_ms=_ms(t0))
 
     # ------------------------------------------------------------------
     # 6. Fraud detection
