@@ -127,6 +127,16 @@ class Policy:
                 return True
         return False
 
+    # -- per-category service lists (DENTAL / VISION have explicit lists) ----
+
+    def covered_services_for_category(self, category: ClaimCategory) -> list[str]:
+        cat = self._category_data(category)
+        return cat.get("covered_procedures", cat.get("covered_items", []))
+
+    def excluded_services_for_category(self, category: ClaimCategory) -> list[str]:
+        cat = self._category_data(category)
+        return cat.get("excluded_procedures", cat.get("excluded_items", []))
+
     # -- required documents -----------------------------------------------
 
     def required_documents(self, category: ClaimCategory) -> list[DocumentType]:
