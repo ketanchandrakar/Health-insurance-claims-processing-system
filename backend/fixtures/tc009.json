@@ -1,0 +1,28 @@
+{
+  "F017": {
+    "file_id": "F017",
+    "doc_type": "PRESCRIPTION",
+    "patient_name": "Ravi Menon",
+    "diagnosis": "Migraine",
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": "2024-10-30",
+    "doctor_name": "Dr. S. Khan",
+    "doc_confidence": 0.94,
+    "status": "OK"
+  },
+  "F018": {
+    "file_id": "F018",
+    "doc_type": "HOSPITAL_BILL",
+    "patient_name": "Ravi Menon",
+    "diagnosis": null,
+    "line_items": [
+      {"description": "Consultation Fee", "amount": 4800}
+    ],
+    "total_amount": 4800,
+    "treatment_date": "2024-10-30",
+    "doctor_name": null,
+    "doc_confidence": 0.93,
+    "status": "OK"
+  }
+}

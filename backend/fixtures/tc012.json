@@ -1,0 +1,30 @@
+{
+  "F023": {
+    "file_id": "F023",
+    "doc_type": "PRESCRIPTION",
+    "patient_name": "Anita Desai",
+    "diagnosis": "Morbid Obesity — BMI 37",
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": "2024-10-18",
+    "doctor_name": "Dr. P. Banerjee",
+    "doctor_reg_no": "WB/34567/2015",
+    "doc_confidence": 0.95,
+    "status": "OK"
+  },
+  "F024": {
+    "file_id": "F024",
+    "doc_type": "HOSPITAL_BILL",
+    "patient_name": "Anita Desai",
+    "diagnosis": null,
+    "line_items": [
+      {"description": "Bariatric Consultation", "amount": 3000},
+      {"description": "Personalised Diet and Nutrition Program", "amount": 5000}
+    ],
+    "total_amount": 8000,
+    "treatment_date": "2024-10-18",
+    "doctor_name": null,
+    "doc_confidence": 0.94,
+    "status": "OK"
+  }
+}

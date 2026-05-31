@@ -1,0 +1,41 @@
+{
+  "F012": {
+    "file_id": "F012",
+    "doc_type": "PRESCRIPTION",
+    "patient_name": "Suresh Patil",
+    "diagnosis": "Suspected Lumbar Disc Herniation",
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": "2024-11-02",
+    "doctor_name": "Dr. Venkat Rao",
+    "doctor_reg_no": "AP/67890/2017",
+    "doc_confidence": 0.95,
+    "status": "OK"
+  },
+  "F013": {
+    "file_id": "F013",
+    "doc_type": "LAB_REPORT",
+    "patient_name": "Suresh Patil",
+    "diagnosis": null,
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": "2024-11-02",
+    "doctor_name": null,
+    "doc_confidence": 0.92,
+    "status": "OK"
+  },
+  "F014": {
+    "file_id": "F014",
+    "doc_type": "HOSPITAL_BILL",
+    "patient_name": "Suresh Patil",
+    "diagnosis": null,
+    "line_items": [
+      {"description": "MRI Lumbar Spine", "amount": 15000}
+    ],
+    "total_amount": 15000,
+    "treatment_date": "2024-11-02",
+    "doctor_name": null,
+    "doc_confidence": 0.94,
+    "status": "OK"
+  }
+}

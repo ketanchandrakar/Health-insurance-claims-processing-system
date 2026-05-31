@@ -1,0 +1,26 @@
+{
+  "F003": {
+    "file_id": "F003",
+    "doc_type": "PRESCRIPTION",
+    "patient_name": "Sneha Reddy",
+    "diagnosis": null,
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": "2024-10-25",
+    "doctor_name": null,
+    "doc_confidence": 0.95,
+    "status": "OK"
+  },
+  "F004": {
+    "file_id": "F004",
+    "doc_type": "PHARMACY_BILL",
+    "patient_name": null,
+    "diagnosis": null,
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": null,
+    "doctor_name": null,
+    "doc_confidence": 0.15,
+    "status": "UNREADABLE"
+  }
+}

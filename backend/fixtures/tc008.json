@@ -1,0 +1,30 @@
+{
+  "F015": {
+    "file_id": "F015",
+    "doc_type": "PRESCRIPTION",
+    "patient_name": "Amit Verma",
+    "diagnosis": "Gastroenteritis",
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": "2024-10-20",
+    "doctor_name": "Dr. R. Gupta",
+    "doctor_reg_no": "DL/34567/2016",
+    "doc_confidence": 0.95,
+    "status": "OK"
+  },
+  "F016": {
+    "file_id": "F016",
+    "doc_type": "HOSPITAL_BILL",
+    "patient_name": "Amit Verma",
+    "diagnosis": null,
+    "line_items": [
+      {"description": "Consultation Fee", "amount": 2000},
+      {"description": "Medicines", "amount": 5500}
+    ],
+    "total_amount": 7500,
+    "treatment_date": "2024-10-20",
+    "doctor_name": null,
+    "doc_confidence": 0.93,
+    "status": "OK"
+  }
+}

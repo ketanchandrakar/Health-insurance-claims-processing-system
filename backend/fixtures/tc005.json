@@ -1,0 +1,29 @@
+{
+  "F009": {
+    "file_id": "F009",
+    "doc_type": "PRESCRIPTION",
+    "patient_name": "Vikram Joshi",
+    "diagnosis": "Type 2 Diabetes Mellitus",
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": "2024-10-15",
+    "doctor_name": "Dr. Sunil Mehta",
+    "doctor_reg_no": "GJ/56789/2014",
+    "doc_confidence": 0.95,
+    "status": "OK"
+  },
+  "F010": {
+    "file_id": "F010",
+    "doc_type": "HOSPITAL_BILL",
+    "patient_name": "Vikram Joshi",
+    "diagnosis": null,
+    "line_items": [
+      {"description": "Consultation Fee", "amount": 3000}
+    ],
+    "total_amount": 3000,
+    "treatment_date": "2024-10-15",
+    "doctor_name": null,
+    "doc_confidence": 0.93,
+    "status": "OK"
+  }
+}

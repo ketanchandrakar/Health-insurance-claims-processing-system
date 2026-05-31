@@ -1,0 +1,17 @@
+{
+  "F011": {
+    "file_id": "F011",
+    "doc_type": "HOSPITAL_BILL",
+    "patient_name": "Priya Singh",
+    "diagnosis": null,
+    "line_items": [
+      {"description": "Root Canal Treatment", "amount": 8000},
+      {"description": "Teeth Whitening", "amount": 4000}
+    ],
+    "total_amount": 12000,
+    "treatment_date": "2024-10-15",
+    "doctor_name": null,
+    "doc_confidence": 0.95,
+    "status": "OK"
+  }
+}

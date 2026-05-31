@@ -1,0 +1,31 @@
+{
+  "F007": {
+    "file_id": "F007",
+    "doc_type": "PRESCRIPTION",
+    "patient_name": "Rajesh Kumar",
+    "diagnosis": "Viral Fever",
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": "2024-11-01",
+    "doctor_name": "Dr. Arun Sharma",
+    "doctor_reg_no": "KA/45678/2015",
+    "doc_confidence": 0.96,
+    "status": "OK"
+  },
+  "F008": {
+    "file_id": "F008",
+    "doc_type": "HOSPITAL_BILL",
+    "patient_name": "Rajesh Kumar",
+    "diagnosis": null,
+    "line_items": [
+      {"description": "Consultation Fee", "amount": 1000},
+      {"description": "CBC Test", "amount": 300},
+      {"description": "Dengue NS1 Test", "amount": 200}
+    ],
+    "total_amount": 1500,
+    "treatment_date": "2024-11-01",
+    "doctor_name": null,
+    "doc_confidence": 0.94,
+    "status": "OK"
+  }
+}

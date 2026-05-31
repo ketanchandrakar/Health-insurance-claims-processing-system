@@ -1,0 +1,28 @@
+{
+  "F005": {
+    "file_id": "F005",
+    "doc_type": "PRESCRIPTION",
+    "patient_name": "Rajesh Kumar",
+    "diagnosis": "Viral Fever",
+    "line_items": [],
+    "total_amount": null,
+    "treatment_date": "2024-11-01",
+    "doctor_name": "Dr. Arun Sharma",
+    "doc_confidence": 0.95,
+    "status": "OK"
+  },
+  "F006": {
+    "file_id": "F006",
+    "doc_type": "HOSPITAL_BILL",
+    "patient_name": "Arjun Mehta",
+    "diagnosis": null,
+    "line_items": [
+      {"description": "Consultation Fee", "amount": 1500}
+    ],
+    "total_amount": 1500,
+    "treatment_date": "2024-11-01",
+    "doctor_name": null,
+    "doc_confidence": 0.93,
+    "status": "OK"
+  }
+}
