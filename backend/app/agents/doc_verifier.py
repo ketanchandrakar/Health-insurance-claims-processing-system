@@ -16,5 +16,34 @@ def verify_documents(
     policy: Policy,
     unreadable_ids: list[str],
 ) -> DocCheckResult:
-    # yet to implement
-    return DocCheckResult(passed=True)
+    required = policy.required_documents(category)
+    uploaded_set = set(uploaded_types)
+    missing = [t for t in required if t not in uploaded_set]
+
+    if not missing and not unreadable_ids:
+        return DocCheckResult(passed=True)
+
+    messages: list[str] = []
+
+    if missing:
+        # TC001: message must name what was uploaded AND what is required
+        uploaded_str = ", ".join(t.value for t in uploaded_types) if uploaded_types else "no documents"
+        required_str = " and ".join(t.value for t in required)
+        missing_str = ", ".join(t.value for t in missing)
+        messages.append(
+            f"You uploaded {uploaded_str}. "
+            f"This {category.value} claim requires {required_str}. "
+            f"Please also upload: {missing_str}."
+        )
+
+    if unreadable_ids:
+        # TC002: one specific message per unreadable file so member knows exactly what to re-upload
+        for fid in unreadable_ids:
+            messages.append(f"File '{fid}' could not be read. Please re-upload a clear copy.")
+
+    return DocCheckResult(
+        passed=False,
+        missing_types=missing,
+        unreadable_files=unreadable_ids,
+        message=" ".join(messages),
+    )
