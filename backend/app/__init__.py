@@ -25,12 +25,19 @@ def create_app() -> Flask:
         if not body:
             return jsonify(error="empty_body"), 400
 
+        fixtures = body.pop("_fixtures", None)
+        today_raw = body.pop("_today", None)
+        today = None
+        if today_raw:
+            from datetime import date
+            today = date.fromisoformat(today_raw)
+
         try:
             claim = ClaimRequest.model_validate(body)
         except Exception as exc:
             return jsonify(error="invalid_request", detail=str(exc)), 422
 
-        decision = run_pipeline(claim, policy)
+        decision = run_pipeline(claim, policy, fixtures=fixtures, today=today)
         return jsonify(decision.model_dump(mode="json"))
 
     return app

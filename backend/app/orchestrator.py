@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import time
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 
 from app.models import (
     AdjudicationResult,
@@ -49,6 +50,7 @@ def evaluate(
     claim: ClaimRequest,
     policy: Policy,
     fixtures: dict | None = None,
+    today: date | None = None,
 ) -> Decision:
     collector = TraceCollector()
     degraded = False
@@ -66,7 +68,7 @@ def evaluate(
     # ------------------------------------------------------------------
     t0 = time.monotonic()
     try:
-        validation = validate(claim, policy)
+        validation = validate(claim, policy, today=today)
         s = TraceStatus.OK if validation.ok else TraceStatus.FAILED
         collector.record(
             "validator", s,
@@ -171,7 +173,8 @@ def evaluate(
             adjudication = adjudicate(extracted, claim, policy)
             collector.record(
                 "adjudicator", TraceStatus.OK,
-                f"Adjudication: {adjudication.decision.value}, approved ₹{adjudication.approved_amount}",
+                f"Adjudication: {adjudication.decision.value}"
+                + (f", approved ₹{adjudication.approved_amount}" if adjudication.approved_amount is not None else ""),
                 adjudication.model_dump(), _ms(t0),
             )
         except Exception as exc:

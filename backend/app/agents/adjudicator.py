@@ -24,11 +24,19 @@ from app.models import (
     ClaimCategory,
     ClaimRequest,
     DecisionStatus,
+    DocumentType,
     ExtractedDoc,
     LineItem,
     LineItemClassification,
     RejectionReason,
 )
+
+# Only billing documents carry financial line items.
+# Prescriptions, lab reports, and clinical reports provide patient/diagnosis
+# context but must not be used as a source of charges — doing so causes
+# double-counting when the same procedure appears on both the clinical report
+# and the hospital bill.
+_BILLING_DOC_TYPES = {DocumentType.HOSPITAL_BILL, DocumentType.PHARMACY_BILL}
 from app.policy import Policy
 
 
@@ -124,10 +132,12 @@ def adjudicate(
         )
 
     # ------------------------------------------------------------------
-    # All guards passed — classify line items
+    # All guards passed — classify line items (billing docs only)
     # ------------------------------------------------------------------
     classified: list[LineItem] = []
     for doc in docs:
+        if doc.doc_type not in _BILLING_DOC_TYPES:
+            continue
         for raw in doc.line_items:
             cls, reason = _classify_line_item(raw.description, claim.claim_category, policy)
             classified.append(LineItem(
