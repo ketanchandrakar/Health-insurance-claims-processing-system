@@ -50,9 +50,11 @@ def extract(doc: DocumentInput, fixture: dict | None = None) -> ExtractedDoc:
             f"No document content for '{doc.file_name}' and no fixture provided"
         )
 
-    api_key = os.getenv("GOOGLE_API_KEY")
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GOOGLE_GEMINI_API_KEY")
     if not api_key:
-        raise ExtractionError("GOOGLE_API_KEY is not set — cannot call Gemini")
+        raise ExtractionError(
+            "Neither GOOGLE_API_KEY nor GOOGLE_GEMINI_API_KEY is set — cannot call Gemini"
+        )
 
     return _call_gemini(doc, api_key)
 
@@ -94,5 +96,11 @@ def _call_gemini(doc: DocumentInput, api_key: str) -> ExtractedDoc:
         raw["total_amount"] = None
     else:
         raw.setdefault("status", ExtractedDocStatus.OK.value)
+        # Gemini sometimes returns null for a line item amount; drop those rows
+        # rather than failing validation (LineItem.amount is a required float).
+        raw["line_items"] = [
+            item for item in raw.get("line_items") or []
+            if item.get("amount") is not None
+        ]
 
     return ExtractedDoc.model_validate(raw)
