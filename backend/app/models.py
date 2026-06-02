@@ -112,6 +112,7 @@ class ClaimRequest(BaseModel):
 
     # Optional context some test cases supply.
     hospital_name: str | None = None          # network-discount check (TC010)
+    pre_auth_number: str | None = None        # pre-authorisation reference (TC007)
     ytd_claims_amount: float = 0.0            # annual-limit check
     claims_history: list[dict] = Field(default_factory=list)  # fraud check (TC009)
 
@@ -173,6 +174,9 @@ class ConsistencyResult(BaseModel):
     consistent: bool
     # Each mismatch: {"field": "patient_name", "values": ["Rajesh Kumar", "Arjun Mehta"]}
     mismatches: list[dict] = Field(default_factory=list)
+    # Soft anomalies that passed but are worth noting (e.g. borderline name score,
+    # near-miss date). Synthesizer applies a -0.10 confidence penalty when non-empty.
+    warnings: list[str] = Field(default_factory=list)
     message: str | None = None  # names both patients on a mismatch (TC003)
 
 

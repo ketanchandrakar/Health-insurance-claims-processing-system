@@ -14,8 +14,10 @@ Decision precedence (highest priority wins):
 
 Confidence model:
   Start at 0.95 for a clean full run.
+  -0.05 per PARTIAL extraction doc (some fields unreadable but doc still usable)
   -0.20 per UNREADABLE doc (read from extractor trace detail)
   -0.15 per DEGRADED or SKIPPED trace event
+  -0.10 if consistency passed but flagged warnings (borderline name/date)
   Floor at 0.10
 """
 from app.models import (
@@ -96,12 +98,20 @@ def _confidence(trace: list[TraceEvent]) -> float:
 
     for event in trace:
         if event.component == "extractor" and event.status == TraceStatus.OK:
+            partial = len(event.detail.get("partial_ids", []))
             unreadable = len(event.detail.get("unreadable_ids", []))
+            score -= 0.05 * partial
             score -= 0.20 * unreadable
 
     for event in trace:
         if event.status in (TraceStatus.DEGRADED, TraceStatus.SKIPPED):
             score -= 0.15
+
+    for event in trace:
+        if event.component == "consistency" and event.status == TraceStatus.OK:
+            if event.detail.get("warnings"):
+                score -= 0.10
+                break
 
     return max(0.10, round(score, 2))
 

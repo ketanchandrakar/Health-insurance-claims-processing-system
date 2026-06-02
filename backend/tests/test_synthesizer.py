@@ -102,6 +102,71 @@ def test_fraud_escalates_approved_to_manual_review():
     assert result.recommend_manual_review is True
 
 
+def test_consistency_warning_reduces_confidence():
+    # Consistency passed (consistent=True) but had warnings → -0.10
+    trace = [
+        TraceEvent(
+            component="consistency",
+            status=TraceStatus.OK,
+            summary="consistency:OK",
+            detail={"consistent": True, "warnings": ["Name near-match (88%): ..."]}
+        )
+    ]
+    result = synthesize(
+        ValidationResult(ok=True),
+        DocCheckResult(passed=True),
+        ConsistencyResult(consistent=True),
+        _ok_adjudication(),
+        FraudResult(),
+        degraded=False,
+        trace=trace,
+    )
+    assert result.confidence == 0.85  # 0.95 - 0.10
+
+
+def test_consistency_no_warnings_full_confidence():
+    trace = [
+        TraceEvent(
+            component="consistency",
+            status=TraceStatus.OK,
+            summary="consistency:OK",
+            detail={"consistent": True, "warnings": []}
+        )
+    ]
+    result = synthesize(
+        ValidationResult(ok=True),
+        DocCheckResult(passed=True),
+        ConsistencyResult(consistent=True),
+        _ok_adjudication(),
+        FraudResult(),
+        degraded=False,
+        trace=trace,
+    )
+    assert result.confidence == 0.95  # no penalty
+
+
+def test_partial_doc_reduces_confidence():
+    # Two PARTIAL docs → 0.95 - 2×0.05 = 0.85
+    trace = [
+        TraceEvent(
+            component="extractor",
+            status=TraceStatus.OK,
+            summary="extractor:OK",
+            detail={"count": 2, "unreadable_ids": [], "partial_ids": ["f1", "f2"]},
+        )
+    ]
+    result = synthesize(
+        ValidationResult(ok=True),
+        DocCheckResult(passed=True),
+        ConsistencyResult(consistent=True),
+        _ok_adjudication(),
+        FraudResult(),
+        degraded=False,
+        trace=trace,
+    )
+    assert result.confidence == 0.85
+
+
 def test_validation_failure_takes_precedence():
     # Validation failed but adjudication says APPROVED — validation must win
     result = synthesize(

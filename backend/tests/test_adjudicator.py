@@ -80,7 +80,7 @@ def test_exclusion_rejected(policy):
 
 
 def test_pre_auth_missing(policy):
-    # TC007: DIAGNOSTIC, ₹15 000 >= ₹10 000 threshold → PRE_AUTH_MISSING
+    # TC007: DIAGNOSTIC, ₹15 000 >= ₹10 000 threshold, no pre_auth_number → REJECTED
     claim = _claim(
         member_id="EMP007",
         claim_category=ClaimCategory.DIAGNOSTIC,
@@ -90,6 +90,19 @@ def test_pre_auth_missing(policy):
     result = adjudicate(_docs("Suspected Lumbar Disc Herniation"), claim, policy)
     assert result.decision == DecisionStatus.REJECTED
     assert RejectionReason.PRE_AUTH_MISSING in result.reasons
+
+
+def test_pre_auth_provided_bypasses_rejection(policy):
+    # Same claim as TC007 but WITH a pre_auth_number — must NOT be rejected for pre-auth
+    claim = _claim(
+        member_id="EMP007",
+        claim_category=ClaimCategory.DIAGNOSTIC,
+        treatment_date=date(2024, 11, 2),
+        claimed_amount=15000.0,
+        pre_auth_number="PA-2024-00123",
+    )
+    result = adjudicate(_docs("Suspected Lumbar Disc Herniation"), claim, policy)
+    assert RejectionReason.PRE_AUTH_MISSING not in result.reasons
 
 
 def test_per_claim_limit_exceeded(policy):

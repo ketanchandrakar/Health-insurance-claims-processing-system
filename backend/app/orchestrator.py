@@ -48,6 +48,19 @@ def _ms(t0: float) -> int:
     return int((time.monotonic() - t0) * 1000)
 
 
+def _finish(decision: Decision, lf_root) -> Decision:
+    lf_root.update(output={
+        "status": decision.status.value,
+        "approved_amount": decision.approved_amount,
+        "rejection_reasons": [r.value for r in decision.rejection_reasons],
+        "reason": decision.reason,
+        "confidence": decision.confidence,
+        "recommend_manual_review": decision.recommend_manual_review,
+        "message_to_member": decision.message_to_member,
+    })
+    return decision
+
+
 def evaluate(
     claim: ClaimRequest,
     policy: Policy,
@@ -112,18 +125,11 @@ def evaluate(
                 if not validation.ok:
                     for comp in ("doc_verifier", "extractor", "consistency", "adjudicator", "fraud"):
                         collector.record(comp, TraceStatus.SKIPPED, "Skipped — validation failed")
-                    decision = synthesize(validation, doc_check, consistency, adjudication, fraud,
-                                          degraded, collector.events)
-                    lf_root.update(output={
-                        "status": decision.status.value,
-                        "approved_amount": decision.approved_amount,
-                        "rejection_reasons": [r.value for r in decision.rejection_reasons],
-                        "reason": decision.reason,
-                        "confidence": decision.confidence,
-                        "recommend_manual_review": decision.recommend_manual_review,
-                        "message_to_member": decision.message_to_member,
-                    })
-                    return decision
+                    return _finish(
+                        synthesize(validation, doc_check, consistency, adjudication, fraud,
+                                   degraded, collector.events),
+                        lf_root,
+                    )
 
                 # ------------------------------------------------------------------
                 # 2. Document type check — Gate 1 (pre-extraction, type check only)
@@ -159,18 +165,11 @@ def evaluate(
                 if not doc_check.passed:
                     for comp in ("extractor", "consistency", "adjudicator", "fraud"):
                         collector.record(comp, TraceStatus.SKIPPED, "Skipped — document gate failed")
-                    decision = synthesize(validation, doc_check, consistency, adjudication, fraud,
-                                          degraded, collector.events)
-                    lf_root.update(output={
-                        "status": decision.status.value,
-                        "approved_amount": decision.approved_amount,
-                        "rejection_reasons": [r.value for r in decision.rejection_reasons],
-                        "reason": decision.reason,
-                        "confidence": decision.confidence,
-                        "recommend_manual_review": decision.recommend_manual_review,
-                        "message_to_member": decision.message_to_member,
-                    })
-                    return decision
+                    return _finish(
+                        synthesize(validation, doc_check, consistency, adjudication, fraud,
+                                   degraded, collector.events),
+                        lf_root,
+                    )
 
                 # ------------------------------------------------------------------
                 # 3. Extraction — parallel per document
@@ -194,9 +193,11 @@ def evaluate(
                             extracted = list(pool.map(_extract_one, claim.documents))
 
                         unreadable = [d.file_id for d in extracted if d.status == ExtractedDocStatus.UNREADABLE]
+                        partial = [d.file_id for d in extracted if d.status == ExtractedDocStatus.PARTIAL]
                         lf_span.update(output={
                             "count": len(extracted),
                             "unreadable_ids": unreadable,
+                            "partial_ids": partial,
                             "docs": [
                                 {
                                     "file_id": d.file_id,
@@ -214,7 +215,7 @@ def evaluate(
                         collector.record(
                             "extractor", TraceStatus.OK,
                             f"Extracted {len(extracted)} doc(s), {len(unreadable)} unreadable",
-                            {"count": len(extracted), "unreadable_ids": unreadable}, _ms(t0),
+                            {"count": len(extracted), "unreadable_ids": unreadable, "partial_ids": partial}, _ms(t0),
                         )
 
                         # Re-run doc check now that we know which files couldn't be read
@@ -224,18 +225,11 @@ def evaluate(
                             if not doc_check.passed:
                                 for comp in ("consistency", "adjudicator", "fraud"):
                                     collector.record(comp, TraceStatus.SKIPPED, "Skipped — unreadable doc gate")
-                                decision = synthesize(validation, doc_check, consistency, adjudication, fraud,
-                                                      degraded, collector.events)
-                                lf_root.update(output={
-                        "status": decision.status.value,
-                        "approved_amount": decision.approved_amount,
-                        "rejection_reasons": [r.value for r in decision.rejection_reasons],
-                        "reason": decision.reason,
-                        "confidence": decision.confidence,
-                        "recommend_manual_review": decision.recommend_manual_review,
-                        "message_to_member": decision.message_to_member,
-                    })
-                                return decision
+                                return _finish(
+                                    synthesize(validation, doc_check, consistency, adjudication, fraud,
+                                               degraded, collector.events),
+                                    lf_root,
+                                )
                     except Exception as exc:
                         degraded = True
                         lf_span.update(metadata={"error": str(exc)})
@@ -254,7 +248,7 @@ def evaluate(
                         as_type="span", name="consistency",
                     ) as lf_span:
                         try:
-                            consistency = check_consistency(extracted)
+                            consistency = check_consistency(extracted, claim_date=claim.treatment_date)
                             s = TraceStatus.OK if consistency.consistent else TraceStatus.FAILED
                             lf_span.update(output={
                                 "consistent": consistency.consistent,
@@ -274,18 +268,11 @@ def evaluate(
                     if not consistency.consistent:
                         for comp in ("adjudicator", "fraud"):
                             collector.record(comp, TraceStatus.SKIPPED, "Skipped — consistency gate failed")
-                        decision = synthesize(validation, doc_check, consistency, adjudication, fraud,
-                                              degraded, collector.events)
-                        lf_root.update(output={
-                        "status": decision.status.value,
-                        "approved_amount": decision.approved_amount,
-                        "rejection_reasons": [r.value for r in decision.rejection_reasons],
-                        "reason": decision.reason,
-                        "confidence": decision.confidence,
-                        "recommend_manual_review": decision.recommend_manual_review,
-                        "message_to_member": decision.message_to_member,
-                    })
-                        return decision
+                        return _finish(
+                            synthesize(validation, doc_check, consistency, adjudication, fraud,
+                                       degraded, collector.events),
+                            lf_root,
+                        )
 
                 # ------------------------------------------------------------------
                 # 5. Adjudication (skipped if extraction failed)
@@ -356,10 +343,11 @@ def evaluate(
                 # ------------------------------------------------------------------
                 # 7. Synthesize final decision
                 # ------------------------------------------------------------------
-                decision = synthesize(validation, doc_check, consistency, adjudication, fraud,
-                                      degraded, collector.events)
-                lf_root.update(output={"status": decision.status.value, "confidence": decision.confidence})
-                return decision
+                return _finish(
+                    synthesize(validation, doc_check, consistency, adjudication, fraud,
+                               degraded, collector.events),
+                    lf_root,
+                )
 
     finally:
         langfuse.flush()

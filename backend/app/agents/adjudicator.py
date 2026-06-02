@@ -30,6 +30,7 @@ from app.models import (
     LineItemClassification,
     RejectionReason,
 )
+from app.policy import Policy
 
 # Only billing documents carry financial line items.
 # Prescriptions, lab reports, and clinical reports provide patient/diagnosis
@@ -37,7 +38,6 @@ from app.models import (
 # double-counting when the same procedure appears on both the clinical report
 # and the hospital bill.
 _BILLING_DOC_TYPES = {DocumentType.HOSPITAL_BILL, DocumentType.PHARMACY_BILL}
-from app.policy import Policy
 
 
 def _classify_line_item(
@@ -107,7 +107,7 @@ def adjudicate(
     # ------------------------------------------------------------------
     if claim.claim_category == ClaimCategory.DIAGNOSTIC:
         threshold = policy.pre_auth_threshold
-        if claim.claimed_amount >= threshold:
+        if claim.claimed_amount >= threshold and not claim.pre_auth_number:
             return AdjudicationResult(
                 decision=DecisionStatus.REJECTED,
                 reasons=[RejectionReason.PRE_AUTH_MISSING],
