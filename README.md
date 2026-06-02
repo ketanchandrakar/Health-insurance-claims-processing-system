@@ -155,17 +155,4 @@ Frontend: added in a later commit (see build order).
 cd backend && pytest -q
 ```
 
-Every significant component ships with tests. The eval harness runs all 12
-cases from `data/test_cases.json` and writes a report showing each decision,
-its full trace, and whether it matched the expected outcome.
 
-## Build order (also the commit story)
-
-1. scaffold + README  ·  2. models + policy loader  ·  3. orchestrator skeleton
-+ /evaluate  ·  4. validation  ·  5. adjudication guards  ·  6. adjudication
-coverage + money  ·  7. Gate 1  ·  8. extraction + fixtures  ·  9. Gate 2  ·
-10. fraud  ·  11. graceful degradation  ·  12. Langfuse  ·  13. React frontend
-·  14. eval runner  ·  15. docs.
-
-The deterministic, testable decision core is built and made green *before* any
-LLM work — see `DECISIONS.md` for why.
