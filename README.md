@@ -33,17 +33,6 @@ whether to approve, partially approve, reject, or escalate the claim — with a
 full, reconstructable explanation for every decision.
 
 
----
-
-## The problem in one paragraph
-
-An employee uploads medical documents (prescriptions, bills, lab reports) and a
-few claim details. A human currently reads those documents, checks them against
-the company's policy rulebook, and decides the outcome. That is slow and does
-not scale. This system does it automatically: it catches bad documents early
-with a specific fix message, reads messy real-world documents with a vision
-model, applies the policy rules deterministically, and emits a decision plus a
-confidence score and a trace that explains exactly what happened.
 
 ## Design philosophy
 
