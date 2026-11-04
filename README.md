@@ -47,8 +47,8 @@ a trace and a confidence score, even when a component was skipped.
 ## Tech stack
 
 - **Backend:** Python, Flask, Pydantic
-- **Frontend:** React
-- **Extraction:** vision LLM 
+- **Frontend:** React (Vite)
+- **Extraction:** Google Gemini 2.5 Flash-Lite (vision)
 - **Observability:** Langfuse — mirrors the in-app trace to spans. The in-app
   trace returned in the API response is the source of truth; Langfuse is the
   production-observability layer, not a replacement.
@@ -58,12 +58,14 @@ a trace and a confidence score, even when a component was skipped.
 ## Repository structure
 
 ```
-claims-system/
+health-insurance-claims-processing-system/
 ├── README.md
-├── DECISIONS.md            # running log of design choices + trade-offs
+├── ARCHITECTURE.md         # design decisions + trade-offs
+├── eval_report.md          # latest run of the 12 eval cases
+├── requirements.txt
 ├── .gitignore
 ├── backend/
-│   ├── requirements.txt
+│   ├── .env.example
 │   ├── app/
 │   │   ├── __init__.py     # Flask app factory
 │   │   ├── main.py         # entrypoint
@@ -75,8 +77,8 @@ claims-system/
 │   │       │               #   adjudicator, fraud, synthesizer
 │   ├── data/               # policy_terms.json, test_cases.json
 │   ├── fixtures/           # per-test-case extracted payloads (deterministic eval)
-│   ├── tests/              # pytest: one file per agent + the 12 eval cases
-│   └── eval/               # run_eval.py -> report over all 12 cases
+│   ├── tests/              # pytest: one file per agent (50 unit tests)
+│   └── eval/               # run_tests.py -> runs all 12 cases against the API
 └── frontend/               # React: submit form, decision card, trace viewer
 ```
 
@@ -104,18 +106,34 @@ Backend:
 ```bash
 cd backend
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env          # add OPENAI_API_KEY and Langfuse keys
+pip install -r ../requirements.txt
+cp .env.example .env          # add GOOGLE_API_KEY and Langfuse keys
 python -m app.main            # serves on http://localhost:8000
 curl localhost:8000/health    # {"status":"ok"}
 ```
 
-Frontend: added in a later commit (see build order).
+Frontend (in a second terminal):
+
+```bash
+cd frontend
+npm install
+npm run dev                   # http://localhost:5173, forwards /claims to :8000
+```
 
 ## Testing
 
+Unit tests (50, one file per agent):
+
 ```bash
 cd backend && pytest -q
+```
+
+End-to-end evals: the 12 cases against the running API (results in `eval_report.md`):
+
+```bash
+cd backend
+pip install requests
+python eval/run_tests.py      # expects 12/12 passed
 ```
 
 
